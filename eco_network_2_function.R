@@ -1,4 +1,4 @@
-eco_network_2<-function(sparcc.boot,phylo, threshold, corThreshold=0){
+eco_network_2<-function(sparcc.boot,phylo, threshold, corThreshold=0, sign="positive"){
   
   #do a first run
   sparcc <- sparcc(otu_table(phylo))
@@ -70,11 +70,31 @@ eco_network_2<-function(sparcc.boot,phylo, threshold, corThreshold=0){
   
   sparcc.high.corr <- SparccP%>% filter(abs(cor) > corThreshold)
   sparccOkP <- sparcc.high.corr%>% filter(fdr < threshold)
+  #keep only positive interactions
+  sparcc.pos <- sparcc.high.corr%>% filter(cor > 0.00)
+  sparcc.neg <- sparcc.high.corr%>% filter(cor < 0.00)
   
   print(paste(dim(sparccOkP)[1]," correlations with adjusted p-values under your", " X ", "threshold were found!", sep=""))
   
   #generate a matrix of fdr-adjusted p-values for igraph
-  mat.sparccP <- acast(sparcc.high.corr, Var1~Var2 )
+  if (sign == "both"){
+    mat.sparccP <- acast(sparcc.high.corr, Var1~Var2 )
+    sparcc.pos$sign <- "pos"
+    sparcc.neg$sign <- "neg"
+    list <- rbind(sparcc.pos,sparcc.neg)
+  }
+  else if (sign == "positive"){
+    mat.sparccP <- acast(sparcc.pos, Var1~Var2 )
+    list <- sparcc.pos
+  }
+  else if (sign == "negative"){
+    mat.sparccP <- acast(sparcc.neg, Var1~Var2 )
+    list <- sparcc.neg
+  }
+  else {
+    return('Wrong sign argument, please choose between "positive", "negative" and "both"')
+  }
+  
   mat.sparccP[lower.tri(mat.sparccP)] <- t(mat.sparccP)[lower.tri(mat.sparccP)]
   
   SparccP_plot <- sparcc.high.corr %>% ggplot(aes(x = Var2, y = Var1, fill = cor)) + geom_tile() + scale_fill_gradient2() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_point(data = sparccOkP, shape = 1)
@@ -102,6 +122,6 @@ eco_network_2<-function(sparcc.boot,phylo, threshold, corThreshold=0){
   
   
   
-  return(list(sparcc.graph.filt,phylo.filt))
+  return(list(sparcc.graph.filt,phylo.filt,list))
   
 }
