@@ -96,6 +96,7 @@ eco_network_2<-function(sparcc.boot,phylo, threshold, corThreshold=0, sign="posi
   }
   
   mat.sparccP[lower.tri(mat.sparccP)] <- t(mat.sparccP)[lower.tri(mat.sparccP)]
+  mat.sparccP[is.na(mat.sparccP)] <- 1
   
   SparccP_plot <- sparcc.high.corr %>% ggplot(aes(x = Var2, y = Var1, fill = cor)) + geom_tile() + scale_fill_gradient2() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_point(data = sparccOkP, shape = 1)
   
