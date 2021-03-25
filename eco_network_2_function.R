@@ -123,6 +123,6 @@ eco_network_2<-function(sparcc.boot,phylo, threshold, corThreshold=0, sign="posi
   
   
   
-  return(list(sparcc.graph.filt,phylo.filt,list))
+  return(list(SparccP_plot, sparcc.graph.filt,phylo.filt,list))
   
 }
