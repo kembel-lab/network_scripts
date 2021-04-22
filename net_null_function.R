@@ -111,13 +111,19 @@ net_null <- function (network, runs = 999)
   
   #iterate over each metric and calculate statistics
   results <- data.frame()
+  distribution <- data.frame(matrix(nrow=runs,ncol=length(metrics.list)))
+  rownames(distribution) <- c(1:runs)
+  colnames(distribution) <- metrics.list
+  
   
   for (metric in metrics.list) {
+    
+    
     
     metric.obs <- get(paste0(metric,".obs"))
     
     metric.rnd <- get(paste0(metric,".rnd"))
-    print(metric.obs)
+    distribution[,metric] <- metric.rnd
     metric.rand.mean <- mean(metric.rnd)
     metric.rand.sd <- sd(metric.rnd)
     metric.obs.z <- (metric.obs - metric.rand.mean) / metric.rand.sd
@@ -134,7 +140,7 @@ net_null <- function (network, runs = 999)
   rownames(results) <- metrics.list
   colnames(results) <- c("Observed metric", "Null model mean", "Null model standard deviation", "Observed metric z score", "Observed metric rank", "Observed metric p-value")
   
-  return(results)
+  return(list(results,distribution))
   
   
 }
