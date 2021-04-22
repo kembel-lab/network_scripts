@@ -153,7 +153,6 @@ net_vertex_null <- function (network, runs = 999, model="unrestricted")
     results <- data.frame()
     
     metric.dat <- as.data.frame(get(paste0(metric,".rnd")))
-    print(dim(metric.dat))
     rownames(metric.dat) <- vertex.names
     
     
