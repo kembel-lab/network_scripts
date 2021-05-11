@@ -1,25 +1,4 @@
-# null models for networks
-network <- sample_gnp(10, 2/10)
-# randomizes node identity but keeps nature/number of edges
-# may not be the null model we want?
-metric.obs <- diameter(network)
-network.adj <- as_adjacency_matrix(network)
-network.adj.d <- as.dist(network.adj)
-network.adj.m <- as.matrix(network.adj)
-network.dim <- dim(network.adj.m)[1]
-network.label.shuf <- sample(network.dim)
-network.adj.m.shuf <- network.adj.m[network.label.shuf, network.label.shuf]
-network.shuf <- graph_from_adjacency_matrix(network.adj.m.shuf, mode="undirected")
-diameter(network)
-diameter(network.shuf)
-metric.rnd <- diameter(network.shuf)
-g <- sample_gnp(10, 2/10)
-h <- graph_from_adjacency_matrix(as_adjacency_matrix(g), mode="undirected")
-diameter(g)
-diameter(h)
-i.d <- as.dist(as_adjacency_matrix(g))
-i <- graph_from_adjacency_matrix(i.d, mode="undirected")
-diameter(i)
+
 net_null <- function (network, runs = 999)
 {
   # actually randomize edges
@@ -28,7 +7,7 @@ net_null <- function (network, runs = 999)
   network.adj.m <- as.matrix(network.adj.d)
   
   ###list of metrics###
-  metrics.list <- c("diameter","motifs","edge_connectivity","vertex_connectivity","girth","radius","centralized_betweenness","centralized_closeness","centralized_degree","centralized_eigen_centrality")
+  metrics.list <- c("diameter","motifs","edge_connectivity","vertex_connectivity","girth","radius","centralized_betweenness","centralized_closeness","centralized_degree","centralized_eigen_centrality","modularity")
   # diameter
   diameter.obs <- diameter(network)
   diameter.rnd <- vector(length=runs)
@@ -62,6 +41,11 @@ net_null <- function (network, runs = 999)
   # centralized_eigen_centrality
   centralized_eigen_centrality.obs <- centr_eigen(network)$centralization
   centralized_eigen_centrality.rnd <- vector(length=runs)
+  
+  # modularity
+  wtc.obs <- cluster_walktrap(network)
+  modularity.obs <- modularity(network, membership(wtc.obs))
+  modularity.rnd <- vector(length=runs)
 
   
     for (i in 1:runs) 
@@ -104,7 +88,8 @@ net_null <- function (network, runs = 999)
     # centralized_eigen_centrality
     centralized_eigen_centrality.rnd[i] <- centr_eigen(network.shuf)$centralization
     
-    
+    #modularity
+    modularity.rnd[i] <- modularity(network.shuf,membership(cluster_walktrap(network.shuf)))
     
     
   }
@@ -144,8 +129,3 @@ net_null <- function (network, runs = 999)
   
   
 }
-# example
-test <- net_null(g)
-test <- net_null(ig.sparcc)
-test
-vertex_connectivity(g)
